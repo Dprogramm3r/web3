@@ -6,18 +6,41 @@ import { avalanche, bsc,optimism, arbitrum, mainnet,polygon, localhost } from '@
 import { publicProvider } from '@wagmi/core/providers/public'
 import { getDefaultWallets } from '@rainbow-me/rainbowkit';
 import {
-  RainbowKitProvider,
+  RainbowKitProvider,connectorsForWallets
 } from '@rainbow-me/rainbowkit';
+import {
+  injectedWallet,
+  rainbowWallet,
+  walletConnectWallet,metaMaskWallet,trustWallet,coinbaseWallet,omniWallet,ledgerWallet,braveWallet 
+} from '@rainbow-me/rainbowkit/wallets';
 
 const {chains, provider} = configureChains(
   [mainnet, avalanche, bsc,polygon, localhost,optimism, arbitrum],
   [publicProvider()]
 );
 
-const {connectors} = getDefaultWallets({
-  appName: "multiwallet connect",
-  chains,
-})
+const connectors = connectorsForWallets([
+  {
+    groupName: 'Recommended',
+    wallets: [
+      injectedWallet({ chains }),
+      rainbowWallet({ chains }),
+      metaMaskWallet({ chains }),
+      trustWallet({ chains }),
+    ],
+  },
+  {
+    groupName: 'Others',
+    wallets: [
+      coinbaseWallet({ chains, appName: 'Others' }),
+      walletConnectWallet({ chains }),
+      ledgerWallet({ chains }),
+      braveWallet({ chains }),
+      omniWallet({ chains }),
+    ],
+  },
+]);
+
 const wagmiClient = createClient({
   autoConnect:true,
   connectors,
@@ -27,7 +50,7 @@ const wagmiClient = createClient({
 export default function App({ Component, pageProps }: AppProps) {
   return ( 
     <WagmiConfig client={wagmiClient}>
-      <RainbowKitProvider chains={chains}>
+      <RainbowKitProvider chains={chains}  modalSize="compact" >
       <Component {...pageProps} />
       </RainbowKitProvider>
   </WagmiConfig>
